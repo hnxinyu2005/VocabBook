@@ -1,0 +1,57 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Header */
+.site-header {
+    width: 100%;
+    background-color: #808080;
+    color: #ffffff;
+    padding:20px 0; /* 高度 */
+}
+
+.header-content {
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+.site-header .logo {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* 主体内容 */
+.main-content {
+    flex: 1; /* 占满 Header 和 Footer 之间的所有空间 */
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Footer */
+.site-footer {
+    width: 100%;
+    background-color: #808080;
+    color: #ffffff;
+    padding: 20px 0;  /* 高度 */
+    text-align: center;
+    margin-top: auto;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}

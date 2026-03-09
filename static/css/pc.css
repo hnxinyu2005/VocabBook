@@ -1,0 +1,91 @@
+.main-content {
+    flex: 1;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 160px);
+}
+
+/* 核心容器 限制最大宽度 + 居中 */
+.content-card {
+    background-color: #f8f9fa; /* 浅灰白背景 */
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    margin: 0; 
+    max-width: 1000px; 
+    width: 100%; 
+}
+
+
+/* 上板块 单词+释义 左右分栏 */
+.word-info-section {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* 左半部分 英文单词+音标 */
+.word-phonetic-wrap {
+    flex: 1;
+}
+/* 英文单词 大字体+黑色 */
+.word {
+    font-size: 48px;
+    font-weight: 700;
+    color: #000;
+    margin: 0 0 10px 0;
+}
+/* 音标 灰色 */
+.phonetic {
+    font-size: 20px;
+    color: #6c757d;
+    margin: 0;
+}
+
+/* 右半部分 释义（支持多词性分行） */
+.meaning-wrap {
+    flex: 2; /* 占2份宽度（比单词区宽，适配多释义） */
+}
+/* 多个词性 分行显示 */
+.meaning-item {
+    font-size: 20px;
+    line-height: 1.8; /* 分行时间距 */
+    color: #343a40;
+    margin: 0 0 8px 0; /* 多词性时的行间距 */
+}
+/* 最后一个释义项取消底部间距 */
+.meaning-item:last-child {
+    margin-bottom: 0;
+}
+
+/* 分隔线 区分上下板块 */
+.section-divider {
+    height: 1px;
+    background-color: #e9ecef;
+    margin: 25px 0;
+}
+
+/* 下板块 例句区 */
+.example-section {
+    padding-top: 10px;
+}
+/* 英文例句 黑色 */
+.example-en {
+    font-size: 18px;
+    color: #000; /* 纯黑 */
+    line-height: 1.6;
+    margin: 0 0 8px 0; /* 和翻译的间距 */
+    font-style: italic;
+}
+/* 例句翻译 灰色 */
+.example-zh {
+    font-size: 16px;
+    color: #6c757d;
+    line-height: 1.6;
+    margin: 0;
+}
