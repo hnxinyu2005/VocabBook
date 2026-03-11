@@ -26,4 +26,4 @@ DEFAULT_UNIT = "未写入单元信息"
 DEFAULT_LAST_REVIEW = "没有考察记录"
 
 # 词性标记最大长度
-POS_MAX_LENGTH = 4
+POS_MAX_LENGTH = 5
