@@ -1,4 +1,5 @@
 # utils/split_meaning.py
+from word_constants import POS_MAX_LENGTH
 
 def split_word_meaning(meaning):
     '''
@@ -32,7 +33,7 @@ def split_word_meaning(meaning):
             trans_part = pos_trans_parts[1].strip()
 
         # 标准词性核验
-        is_standard_pos = len(pos) <= 6 and pos.endswith(".") and pos != ""
+        is_standard_pos = len(pos) <= POS_MAX_LENGTH and pos.endswith(".") and pos != ""
         if not is_standard_pos:
             continue
 
