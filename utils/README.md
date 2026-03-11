@@ -46,3 +46,31 @@ split_word_meaning(meaning)
     {"pos": "v.", "trans_list": ["写作"]}
 ]
 ```
+
+## split_word_example(example, example_trans)
+
+### 所属文件
+utils/split_example.py
+
+### 功能
+拆分单词例句和对应翻译字符串，保证例句与翻译列表长度一一对应。
+
+### 输入规则
+- 多个例句/翻译之间用**英文分号**隔开；
+- 例句中的“**”为单词在例句中出现的位置，无需处理；
+- 例句/翻译为空时，返回空列表。
+
+### 输入示例
+```python
+example = "Our guest...**author**.;Another sentence."
+example_trans = "我们今天的...作者。;另一个句子。"
+split_word_example(example, example_trans)
+```
+
+### 输出示例
+```python
+{
+    "example_list": ["Our guest...**author**.", "Another sentence."],
+    "example_trans_list": ["我们今天的...作者。", "另一个句子。"]
+}
+```

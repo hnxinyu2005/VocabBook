@@ -6,7 +6,7 @@ def split_word_meaning(meaning):
     当前路径下的 README.md 写有详细规则。
 
     :param meaning: 释义字符串
-    :return:list[dict]
+    :return: list[dict]
     '''
 
     result = []
