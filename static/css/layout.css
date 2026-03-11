@@ -19,7 +19,7 @@ html, body {
     width: 100%;
     background-color: #808080;
     color: #ffffff;
-    padding:20px 0; /* 高度 */
+    padding:30px 0; /* 高度 */
 }
 
 .header-content {
@@ -45,7 +45,7 @@ html, body {
     width: 100%;
     background-color: #808080;
     color: #ffffff;
-    padding: 20px 0;  /* 高度 */
+    padding: 25px 0;  /* 高度 */
     text-align: center;
     margin-top: auto;
 }
@@ -54,4 +54,21 @@ html, body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+}
+
+/* Footer 链接样式 */
+.site-footer a {
+    color: #ffffff; /* 白色文字，适配灰色背景 */
+    text-decoration: none; /* 去掉默认下划线 */
+    margin: 0 8px; /* 链接之间增加间距 */
+}
+
+.site-footer a:hover {
+    color: #e0e0e0; /* 鼠标悬浮变浅灰 */
+    text-decoration: underline; /* 悬浮显示下划线 */
+}
+
+/* 修复默认分隔符间距 */
+.site-footer p {
+    line-height: 1.5;
 }

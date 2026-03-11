@@ -1,12 +1,8 @@
-from utils.check_files import check_and_fix_wordbooks
-from utils.txt2csv import txt_to_csv
+from flask import Flask
+from routes.word_routes import register_word_routes
 
-print("VocabBook")
+# 初始化Flask应用
+app = Flask(__name__)
 
-print("检查初始单词本")
-check_and_fix_wordbooks("default.csv")
-
-print("检查初始单词本")
-txt_file_path = "test_text.txt"
-csv_filename = "default.csv"
-txt_to_csv(txt_file_path, csv_filename)
+# 注册单词相关路由（仅这一行，路由完全独立）
+register_word_routes(app)

@@ -1,6 +1,7 @@
+/* 主体内容区域 */
 .main-content {
     flex: 1;
-    padding: 40px 20px;
+    padding: 60px 20px;
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
@@ -9,83 +10,180 @@
     min-height: calc(100vh - 160px);
 }
 
-/* 核心容器 限制最大宽度 + 居中 */
+/* 核心容器 */
 .content-card {
-    background-color: #f8f9fa; /* 浅灰白背景 */
-    border-radius: 12px;
-    padding: 40px;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-    margin: 0; 
-    max-width: 1000px; 
-    width: 100%; 
+    background-color: #f8f9fa;
+    border-radius: 16px;
+    padding: 40px 50px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    margin: 0;
+    max-width: 800px;
+    width: 100%;
 }
 
-
-/* 上板块 单词+释义 左右分栏 */
+/* ========== 重构核心：上板块整体布局 ========== */
+/* 上板块：改为垂直排列的上下两栏 */
 .word-info-section {
     display: flex;
-    gap: 40px;
-    align-items: center;
-    margin-bottom: 20px;
+    flex-direction: column; /* 垂直分栏（上/下） */
+    gap: 16px; /* 上下栏之间的间距，可调整 */
+    margin-bottom: 10px;
+    width: 100%; /* 占满容器宽度 */
 }
 
-/* 左半部分 英文单词+音标 */
+/* 上栏：单词+音标（左） + 释义（右） */
+.info-top-row {
+    display: flex;
+    gap: 60px; /* 左右间距，保留原有值 */
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* 下栏：考察信息 + 上次时间（一行展示） */
+.info-bottom-row {
+    display: flex;
+    justify-content: space-between; /* 左边考察信息，右边时间 */
+    align-items: center; /* 垂直居中对齐 */
+    width: 100%;
+    font-size: 16px;
+    color: #6c757d;
+}
+/* ============================================= */
+
+/* 左半部分 英文单词+音标（仅调整归属，样式不变） */
 .word-phonetic-wrap {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* 单词与音标紧贴 */
 }
-/* 英文单词 大字体+黑色 */
 .word {
-    font-size: 48px;
+    font-size: 58px;
     font-weight: 700;
     color: #000;
-    margin: 0 0 10px 0;
+    margin: 0;
 }
-/* 音标 灰色 */
 .phonetic {
-    font-size: 20px;
+    font-size: 24px;
     color: #6c757d;
     margin: 0;
 }
 
-/* 右半部分 释义（支持多词性分行） */
-.meaning-wrap {
-    flex: 2; /* 占2份宽度（比单词区宽，适配多释义） */
+/* 考察次数/正确率样式（适配下栏一行展示） */
+.exam-stats {
+    display: flex;
+    gap: 30px; /* 两个统计项间距 */
+    margin: 0; /* 取消原有margin-top，适配新布局 */
 }
-/* 多个词性 分行显示 */
-.meaning-item {
-    font-size: 20px;
-    line-height: 1.8; /* 分行时间距 */
-    color: #343a40;
-    margin: 0 0 8px 0; /* 多词性时的行间距 */
+.stats-item {
+    color: #6c757d;
+    /* 核心：改为行内垂直排列，适配一行展示 */
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 16px;
 }
-/* 最后一个释义项取消底部间距 */
-.meaning-item:last-child {
-    margin-bottom: 0;
+.stats-label {
+    white-space: nowrap;
+}
+.stats-value {
+    margin-top: 2px;
 }
 
-/* 分隔线 区分上下板块 */
+/* 右半部分 释义（仅调整归属，样式不变） */
+.meaning-wrap {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+/* 上一次考察时间（适配下栏一行展示） */
+.last-exam-time {
+    color: #6c757d;
+    font-size: 16px;
+    margin: 0; /* 取消原有margin-top */
+    display: flex;
+    gap: 8px;
+    align-items: flex-start; /* 与考察信息垂直对齐 */
+}
+.last-exam-time .label {
+    white-space: nowrap;
+}
+.last-exam-time .time {
+    display: block;
+    text-align: right;
+}
+
+/* 多词性释义样式（完全保留原有逻辑） */
+.meaning-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    width: 100%;
+}
+.meaning-box {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+}
+.pos-part {
+    font-size: 24px;
+    font-weight: 600;
+    color: #343a40;
+    min-width: 40px;
+    text-align: right;
+    line-height: 1.8;
+}
+.trans-part {
+    font-size: 24px;
+    color: #343a40;
+    line-height: 1.8;
+    text-align: left;
+    flex: 1;
+    word-wrap: break-word;
+    word-break: normal;
+}
+
+/* 分隔线（不变） */
 .section-divider {
     height: 1px;
     background-color: #e9ecef;
-    margin: 25px 0;
+    margin: 15px 0 25px 0;
 }
 
-/* 下板块 例句区 */
+/* 下板块 例句 + 书籍来源（完全不变） */
 .example-section {
-    padding-top: 10px;
+    padding-top: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
-/* 英文例句 黑色 */
+.example-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 .example-en {
-    font-size: 18px;
-    color: #000; /* 纯黑 */
-    line-height: 1.6;
-    margin: 0 0 8px 0; /* 和翻译的间距 */
+    font-size: 22px;
+    color: #000;
+    line-height: 1.8;
+    margin: 0;
     font-style: italic;
 }
-/* 例句翻译 灰色 */
 .example-zh {
+    font-size: 18px;
+    color: #6c757d;
+    line-height: 1.8;
+    margin: 0;
+}
+.book-source {
     font-size: 16px;
     color: #6c757d;
-    line-height: 1.6;
-    margin: 0;
+    font-style: normal;
+    align-self: flex-end;
+    margin: 5px 0 0 0;
 }

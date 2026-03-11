@@ -1,55 +1,103 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-    <head>
-        <meta charset="UTF-8">
-        <title>VocalBook</title>
-        <link rel="stylesheet" href="/static/css/layout.css">
-        <link rel="stylesheet" href="/static/css/pc.css">
-    </head>
-    <body>
-        <!-- 页面整体 -->
-        <div class="page-wrapper">
-            <!-- Header -->
-            <header class="site-header">
-                <div class="header-content">
-                    <h1 class="logo">VocalBook</h1>
-                </div>
-            </header>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ word.word }} - VocalBook</title>
+    <link rel="stylesheet" href="/static/css/layout.css">
+    <link rel="stylesheet" href="/static/css/pc.css">
+</head>
+<body>
+    <!-- 页面整体 -->
+    <div class="page-wrapper">
+        <!-- Header -->
+        <header class="site-header">
+            <div class="header-content">
+                <h1 class="logo">VocalBook (当前词库：{{ current_book }})</h1>
+            </div>
+        </header>
 
-            <!-- 主体内容 -->
-            <main class="main-content">
-                <!-- 核心容器 -->
-                <div class="content-card">
-                    <!-- 上板块 -->
-                    <div class="word-info-section">
-                        <!-- 左半部分 英文单词+音标 -->
+        <!-- 主体内容 -->
+        <main class="main-content">
+            <!-- 核心容器 -->
+            <div class="content-card">
+                <!-- 上板块 -->
+                <!-- 上板块：拆分为上下两栏 -->
+                <div class="word-info-section">
+                    <!-- 上栏：单词+音标（左） + 释义（右） -->
+                    <div class="info-top-row">
+                        <!-- 左：单词+音标 -->
                         <div class="word-phonetic-wrap">
-                            <p class="word">author</p>
-                            <p class="phonetic">/ˈɔːθə(r)/</p>
+                            <p class="word">{{ word.word }}</p>
+                            <p class="phonetic">{{ word.phonetic }}</p>
                         </div>
-                        <!-- 右半部分 释义 -->
+                        <!-- 右：释义 -->
                         <div class="meaning-wrap">
-                            <p class="meaning-item">n. 著作家,作者;创始人,发起者</p>
+                            <!-- 多词性释义容器 -->
+                            <div class="meaning-container">
+                                {% for pos in word.pos_list %}
+                                <div class="meaning-box">
+                                    <div class="pos-part">{{ pos.pos }}</div>
+                                    <div class="trans-part">{{ pos.trans }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 分隔线 -->
-                    <div class="section-divider"></div>
-
-                    <!-- 下板块 例句 -->
-                    <div class="example-section">
-                        <p class="example-en">He is a famous author who has written many books.</p>
-                        <p class="example-zh">他是一位写过很多书的著名作家。</p>
+                    <!-- 下栏：考察次数 + 正确率 + 上一次考察时间（一行展示） -->
+                    <div class="info-bottom-row">
+                        <!-- 考察次数+正确率 -->
+                        <div class="exam-stats">
+                            <div class="stats-item">
+                                <span class="stats-label">考察次数：</span>
+                                <span class="stats-value">{{ word.review_count }} 次</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">正确率：</span>
+                                <span class="stats-value">{{ word.accuracy }}</span>
+                            </div>
+                        </div>
+                        <!-- 上一次考察时间 -->
+                        <div class="last-exam-time">
+                            <span class="label">上一次考察时间：</span>
+                            <span class="time">{{ word.last_review }}</span>
+                        </div>
                     </div>
                 </div>
-            </main>
 
-            <!-- Footer -->
-            <footer class="site-footer">
-                <div class="footer-content">
-                    <p>项目地址</p>
+                <!-- 分隔线 -->
+                <div class="section-divider"></div>
+
+                <!-- 下板块 例句 -->
+                <div class="example-section">
+                    <!-- 循环展示多例句 -->
+                    {% for item in word.examples_list %}
+                        <p class="example-en">{{ item.en }}</p>
+                        <p class="example-zh">{{ item.zh }}</p>
+                        {% if not loop.last %}
+                            <div class="example-divider"></div> <!-- 多例句分隔线 -->
+                        {% endif %}
+                    {% endfor %}
+                    <!-- 书籍来源 -->
+                    <div class="book-source">
+                        来自于 {{ word.book_source }}
+                    </div>
                 </div>
-            </footer>
-        </div>
-    </body>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="footer-content">
+                <p>
+                    <a href="/">返回首页</a> |
+                    <a href="/api/wordbooks">查看所有词库</a> |
+                    <!-- 新增 GitHub 链接 -->
+                    <a href="https://github.com/hnxinyu2005/VocabBook" target="_blank" rel="noopener noreferrer">关于 VocabBook</a>
+                </p>
+            </div>
+        </footer>
+    </div>
+</body>
 </html>
