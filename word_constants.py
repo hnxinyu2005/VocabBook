@@ -3,7 +3,7 @@
 # 单词文件夹
 WORDBOOKS_FOLDER_NAME = "wordbooks"
 # 默认单词库文件名
-DEFAULT_WORDBOOK = "default.csv"
+DEFAULT_WORDBOOK = "default"
 
 # 标准CSV表头
 STANDARD_CSV_HEADERS = [
