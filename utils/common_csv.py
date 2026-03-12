@@ -2,28 +2,59 @@
 
 import pandas as pd
 import os
+import re
 
 from word_constants import WORDBOOKS_FOLDER_NAME, DEFAULT_WORDBOOK, STANDARD_CSV_HEADERS, DEFAULT_ENCODING, DEFAULT_VALUES
-
-# 两个拆分函数
-from split_meaning import split_word_meaning
-from split_example import split_word_example
-# 计算正确率
-from calculate_word_accuracy import calculate_accuracy_numeric
+from utils.split_meaning import split_word_meaning
+from utils.split_example import split_word_example
+from utils.calculate_word_accuracy import calculate_accuracy_numeric
 
 def get_wordbook_csv_path(filename):
-    # 去除首尾空格
-    filename_stripped = filename.strip()
+    '''
+    生成单词本csv文件路径
+
+    :param filename: 文件名 无需后缀
+    :return: 安全的csv绝对路径
+    '''
+
+    # 去除空格和多余后缀
+    filename_stripped = filename.strip() if filename else ""
+    # 空文件名默认使用DEFAULT_WORDBOOK
+    if not filename_stripped:
+        filename_stripped = DEFAULT_WORDBOOK
     # 去除已有的.csv后缀
     if filename_stripped.lower().endswith(".csv"):
         filename_stripped = filename_stripped[:-4]
-    # 拼接.csv后缀
-    csv_filename = f"{filename_stripped}.csv"
-    file_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        WORDBOOKS_FOLDER_NAME,
-        csv_filename
+
+    # 过滤路径遍历字符 + 非法字符
+    # 禁止包含路径分隔符（/、\）和路径遍历符（../、./）
+    forbidden_chars = r"[\\/:\*\?\"<>|]" # 系统非法文件名字符 + 路径符
+    # 替换所有非法字符为下划线
+    safe_filename = re.sub(forbidden_chars, "_", filename_stripped)
+    # 进一步过滤路径遍历关键词（防止../变形绕过，如..\、. ./等）
+    safe_filename = re.sub(r"\.\.+", "_", safe_filename) # 过滤多个点
+    safe_filename = re.sub(r"\.\s*/", "_", safe_filename) # 过滤. / 形式
+    safe_filename = re.sub(r"\.\s*\\", "_", safe_filename) # 过滤. \ 形式
+
+    # 强制限制路径在单词本目录内
+    # 拼接基础文件名
+    csv_filename = f"{safe_filename}.csv"
+    # 获取单词本目录的绝对路径
+    base_dir = os.path.abspath(
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), WORDBOOKS_FOLDER_NAME)
     )
+    # 拼接目标文件路径
+    file_path = os.path.join(base_dir, csv_filename)
+    # 强制转换为绝对路径 防止相对路径绕过
+    file_path = os.path.abspath(file_path)
+
+    # 确保文件路径在单词本目录内
+    # 检查目标路径是否是单词本目录的子路径
+    if not file_path.startswith(base_dir + os.sep):
+        # 若跳出 则强制使用默认文件名
+        csv_filename = f"{DEFAULT_WORDBOOK}.csv"
+        file_path = os.path.join(base_dir, csv_filename)
+
     return file_path
 
 def validate_wordbook_csv(file_path):
@@ -114,9 +145,20 @@ def create_wordbook_csv(filename, encoding=DEFAULT_ENCODING):
     if not filename_stripped:
         return False, "文件名不能为空"
 
+    # 增强文件名校验（禁止路径符+系统保留字符）
+    # 定义禁止的字符 路径分隔符（/、\） + Windows系统保留字符（: * ? " < > |）
+    forbidden_chars = r"[\\/:\*\?\"<>|]"
+    # 检查是否包含禁止字符
+    if re.search(forbidden_chars, filename_stripped):
+        # 提取用户输入中的非法字符
+        illegal_chars = re.findall(forbidden_chars, filename_stripped)
+        # 去重并格式化提示
+        unique_illegal = list(set(illegal_chars))
+        return False, f"文件名 {filename_stripped} 包含非法字符：{unique_illegal}，禁止使用 / \ : * ? \" < > | 等字符"
+
     # 名称不能包含空格
     if " " in filename_stripped:
-        return False, f"文件名 {filename_stripped} 包含空格，不允许创建"
+        return False, f"文件名 {filename_stripped} 包含空格，不允许创建,可用英文下划线代替"
 
     # 获取文件路径
     file_path = get_wordbook_csv_path(filename_stripped)
@@ -143,7 +185,7 @@ def create_wordbook_csv(filename, encoding=DEFAULT_ENCODING):
         return True, f"文件 {file_path} 创建成功"
 
     except Exception as e:
-        return False, f"文件 {file_path} 床架你失败，{str(e)}"
+        return False, f"文件 {file_path} 创建失败，{str(e)}"
 
 def write_processed_csv(text, filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODING):
     '''
@@ -224,10 +266,34 @@ def write_processed_csv(text, filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODI
                 fail_messages.append(f"第{row_num}条：单词「{current_word}」已存在，不允许重复")
                 continue
 
-            # 合规数据补充系统字段
-            word_row['review_count'] = "0"
-            word_row['correct_count'] = "0"
-            word_row['last_review'] = ""
+            # 系统字段不再强制覆盖 优先使用用户输入
+            # 1. review_count 用户传入则校验是否为数字 非法则用默认0
+            try:
+                # 先取用户传入的值（如果有且非空）
+                user_review = item.get('review_count', '').strip()
+                if user_review and user_review.isdigit():
+                    word_row['review_count'] = user_review
+                else:
+                    word_row['review_count'] = "0" # 无合法值则用默认
+            except:
+                word_row['review_count'] = "0"
+
+            # correct_count 同上
+            try:
+                user_correct = item.get('correct_count', '').strip()
+                if user_correct and user_correct.isdigit():
+                    word_row['correct_count'] = user_correct
+                else:
+                    word_row['correct_count'] = "0"
+            except:
+                word_row['correct_count'] = "0"
+
+            # last_review 用户传入则用 无则为空字符串
+            try:
+                user_last_review = item.get('last_review', '').strip()
+                word_row['last_review'] = user_last_review if user_last_review else ""
+            except:
+                word_row['last_review'] = ""
 
             # 合规数据加入列表 更新已存在单词集合
             new_data.append(word_row)
@@ -274,13 +340,6 @@ def read_processed_csv(filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODING, val
 
     is_valid = True
     error_msgs = ""
-
-    if validate:
-        # 检查文件存在性及表头规范
-        is_valid, error_msg = validate_wordbook_csv(file_path)
-        if not is_valid:
-            print(error_msg)
-            return pd.DataFrame()
 
     if validate:
         # 检查文件存在性及表头规范
@@ -353,237 +412,4 @@ def read_processed_csv(filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODING, val
         print(f"读取并预处理CSV失败，{str(e)}")
         return pd.DataFrame()
 
-'''
-# 读内容测试
-if __name__ == "__main__":
-    print("=" * 80)
-    print("📝 测试：读取并展示 wordbooks/default.csv 内容")
-    print("=" * 80)
-
-    # 1. 读取default.csv（先关闭校验，避免空值导致读取失败，方便看完整数据）
-    print("\n1️⃣ 读取default.csv（关闭校验+开启字段拆分）：")
-    df = read_processed_csv("default", validate=False, split_fields=True)
-
-    if df.empty:
-        print("❌ 读取失败：文件为空或不存在")
-    else:
-        print(f"✅ 读取成功，共 {len(df)} 条单词数据")
-
-        # 2. 输出核心字段预览（替换nan为更友好的显示，总考察次数放正确率前）
-        print("\n2️⃣ 核心字段预览：")
-        # 调整字段顺序：总考察次数(review_count_num) → 正确率(accuracy)
-        core_fields = ["word", "phonetic", "textbook", "unit", "review_count_num", "accuracy"]
-        # 替换DataFrame中的nan为空字符串，显示更友好 + 重命名列名更易读
-        df_display = df[core_fields].fillna("暂无数据").rename(
-            columns={
-                "review_count_num": "总考察次数",
-                "accuracy": "正确率(%)",
-                "phonetic": "音标",
-                "textbook": "教材",
-                "unit": "单元"
-            }
-        )
-        print(df_display.to_string(index=False))
-
-        # 3. 输出单个单词的拆分示例（健壮版：优先找author，没有则用第一个单词）
-        print("\n3️⃣ 字段拆分示例：")
-        # 优先找author，不存在则取第一个单词
-        target_word = "author"
-        if (df["word"] == target_word).any():
-            sample_row = df[df["word"] == target_word].iloc[0]
-            print(f"👉 选中单词：{target_word}")
-        else:
-            sample_row = df.iloc[0]
-            target_word = sample_row["word"]
-            print(f"👉 未找到{target_word}，使用第一个单词：{target_word}")
-
-        print(f"   释义拆分（meaning_split）：{sample_row['meaning_split']}")
-        print(f"   例句拆分（example_split）：{sample_row['example_split']}")
-
-        # 4. 输出正确率计算示例（总考察次数放正确率前，重命名列名）
-        print("\n4️⃣ 正确率计算详情：")
-        accuracy_fields = ["word", "review_count_num", "correct_count_num", "accuracy"]
-        df_accuracy = df[accuracy_fields].rename(
-            columns={
-                "review_count_num": "总考察次数",
-                "correct_count_num": "正确次数",
-                "accuracy": "正确率(%)"
-            }
-        )
-        print(df_accuracy.to_string(index=False))
-
-        # 5. 验证空值填充（找第一个phonetic为空的单词）
-        print("\n5️⃣ 空值填充验证：")
-        # 找phonetic为空/na的单词
-        empty_phonetic_row = df[df["phonetic"].isna() | (df["phonetic"] == "")].iloc[0] if len(
-            df[df["phonetic"].isna() | (df["phonetic"] == "")]) > 0 else df.iloc[0]
-        word_name = empty_phonetic_row["word"]
-        phonetic_value = empty_phonetic_row["phonetic"]
-        # 显示填充结果（替换nan为"未填充"）
-        phonetic_display = phonetic_value if not pd.isna(phonetic_value) else "未填充"
-        print(f"👉 单词「{word_name}」的phonetic：{phonetic_display}")
-
-        print("\n" + "=" * 80)
-        print("✅ 测试完成！")
-        print("=" * 80)
-'''
-
-'''
-# 测试创建单词本
-if __name__ == "__main__":
-    print("=" * 80)
-    print("📝 测试：创建单词本CSV文件")
-    print("=" * 80)
-
-    # 测试场景1：创建空名称的单词本（预期失败）
-    print("\n1️⃣ 测试场景：创建空名称的单词本")
-    is_done, error_msg = create_wordbook_csv("")
-    print(f"   结果：{'✅ 成功' if is_done else '❌ 失败'}")
-    print(f"   提示：{error_msg}")
-
-    # 测试场景2：创建名称含空格的单词本（预期失败）
-    print("\n2️⃣ 测试场景：创建名称含空格的单词本（test book）")
-    is_done, error_msg = create_wordbook_csv("test book")
-    print(f"   结果：{'✅ 成功' if is_done else '❌ 失败'}")
-    print(f"   提示：{error_msg}")
-
-    # 测试场景3：创建新的合法单词本（预期成功）
-    test_book_name = "test_new_wordbook"
-    print(f"\n3️⃣ 测试场景：创建新的合法单词本（{test_book_name}）")
-    is_done, error_msg = create_wordbook_csv(test_book_name)
-    print(f"   结果：{'✅ 成功' if is_done else '❌ 失败'}")
-    print(f"   提示：{error_msg}")
-
-    # 测试场景4：重复创建同一个单词本（预期失败）
-    print(f"\n4️⃣ 测试场景：重复创建单词本（{test_book_name}）")
-    is_done, error_msg = create_wordbook_csv(test_book_name)
-    print(f"   结果：{'✅ 成功' if is_done else '❌ 失败'}")
-    print(f"   提示：{error_msg}")
-
-    # 可选：清理测试文件（创建成功后删除，避免残留）
-    if os.path.exists(get_wordbook_csv_path(test_book_name)):
-        os.remove(get_wordbook_csv_path(test_book_name))
-        print(f"\n5️⃣ 清理测试文件：已删除 {test_book_name}.csv")
-
-    print("\n" + "=" * 80)
-    print("✅ 创建单词本测试完成！")
-    print("=" * 80)
-'''
-
-# 测试写入单词数据（覆盖核心场景+全字段数据）
-if __name__ == "__main__":
-    print("=" * 80)
-    print("📝 测试：写入单词数据到CSV（容错逻辑+全字段数据）")
-    print("=" * 80)
-
-    # 前置准备：创建测试用单词本（确保文件存在且格式合规）
-    test_book_name = "test_write_wordbook"
-    # 先删除残留的测试文件（避免影响）
-    test_book_path = get_wordbook_csv_path(test_book_name)
-    if os.path.exists(test_book_path):
-        os.remove(test_book_path)
-    # 创建新的测试单词本
-    create_done, create_msg = create_wordbook_csv(test_book_name)
-    print(f"🔧 前置准备：{create_msg}")
-
-    # ---------------- 测试场景1：写入单条合法数据 ----------------
-    print("\n1️⃣ 测试场景：写入单条合法单词数据")
-    single_valid_data = {
-        "word": "teacher",
-        "phonetic": "/ˈtiːtʃə(r)/",
-        "meaning": "n. 教师,老师;导师  v. 教书,授课",
-        "example": "Our **teacher** always encourages us to think independently.",
-        "example_trans": "我们的老师总是鼓励我们独立思考。",
-        "textbook": "牛津《初阶英汉双解词典》",
-        "unit": "Unit 6; p28"
-    }
-    is_done, error_msg = write_processed_csv(single_valid_data, test_book_name)
-    print(f"   结果：{'✅ 成功' if is_done else '❌ 失败'}")
-    print(f"   提示：{error_msg}")
-
-    # ---------------- 测试场景2：写入多条混合错误数据（容错逻辑） ----------------
-    print("\n2️⃣ 测试场景：写入多条混合错误数据（验证容错）")
-    multi_mixed_data = [
-        {"word": "", "meaning": "n. 学生", "phonetic": "/ˈstjuːdnt/"},  # 空word（失败）
-        {"word": "student", "meaning": "", "phonetic": "/ˈstjuːdnt/"},  # 空meaning（失败）
-        {"word": "teacher", "meaning": "n. 教师", "phonetic": "/ˈtiːtʃə(r)/"},  # 重复word（失败）
-        {"word": "doctor", "meaning": "n. 医生,大夫;博士", "phonetic": "/ˈdɒktə(r)/",  # 合法数据（成功）
-         "textbook": "新东方《四级词汇》", "unit": "Word List 2; p5"},
-    ]
-    is_done, error_msg = write_processed_csv(multi_mixed_data, test_book_name)
-    print(f"   结果：{'✅ 部分成功' if is_done else '❌ 全部失败'}")
-    print(f"   提示：{error_msg}")
-
-    # ---------------- 测试场景3：写入错误格式数据（非字典/列表） ----------------
-    print("\n3️⃣ 测试场景：写入错误格式数据（字符串）")
-    wrong_format_data = "teacher,/ˈtiːtʃə(r)/,n. 教师"  # 非字典/列表
-    is_done, error_msg = write_processed_csv(wrong_format_data, test_book_name)
-    print(f"   结果：{'✅ 成功' if is_done else '❌ 失败'}")
-    print(f"   提示：{error_msg}")
-
-    # ---------------- 测试场景4：文件名留空（默认default.csv） ----------------
-    print("\n4️⃣ 测试场景：文件名留空（默认写入default.csv）")
-    # 先确保default.csv存在
-    default_path = get_wordbook_csv_path(DEFAULT_WORDBOOK)
-    if not os.path.exists(default_path):
-        create_wordbook_csv(DEFAULT_WORDBOOK)
-    # 写入单条合法数据到默认文件
-    default_data = {"word": "engineer", "meaning": "n. 工程师,技师", "phonetic": "/ˌendʒɪˈnɪə(r)/"}
-    is_done, error_msg = write_processed_csv(default_data, filename="")  # 文件名留空
-    print(f"   结果：{'✅ 成功' if is_done else '❌ 失败'}")
-    print(f"   提示：{error_msg}")
-
-    # ---------------- 测试场景5：写入全字段完整数据（包含例句/翻译等所有字段） ----------------
-    print("\n5️⃣ 测试场景：写入全字段完整数据（含例句、翻译、教材、单元）")
-    full_field_data = {
-        "word": "programmer",
-        "phonetic": "/ˈprəʊɡræmə(r)/",
-        "meaning": "n. 程序员,编程人员;程序设计器  v. 为...编写程序",
-        "example": "The **programmer** spent 3 hours debugging the code; A good **programmer** must master multiple languages.",
-        "example_trans": "这位程序员花了3小时调试代码；一名优秀的程序员必须掌握多种语言。",
-        "textbook": "Python编程：从入门到实践",
-        "unit": "Chapter 1; p15"
-    }
-    is_done, error_msg = write_processed_csv(full_field_data, test_book_name)
-    print(f"   结果：{'✅ 成功' if is_done else '❌ 失败'}")
-    print(f"   提示：{error_msg}")
-
-    # ---------------- 测试场景6：验证全字段写入结果（读取完整数据） ----------------
-    print("\n6️⃣ 验证全字段写入结果（展示所有字段）")
-    df = read_processed_csv(test_book_name, validate=False)
-    # 筛选出全字段测试数据
-    full_data_row = df[df["word"] == "programmer"].iloc[0] if (df["word"] == "programmer").any() else None
-    if full_data_row is not None:
-        print("   全字段数据写入结果：")
-        print(f"      单词：{full_data_row['word']}")
-        print(f"      音标：{full_data_row['phonetic']}")
-        print(f"      释义：{full_data_row['meaning']}")
-        print(f"      例句：{full_data_row['example']}")
-        print(f"      例句翻译：{full_data_row['example_trans']}")
-        print(f"      教材：{full_data_row['textbook']}")
-        print(f"      单元：{full_data_row['unit']}")
-        print(f"      系统字段-考察次数：{full_data_row['review_count']}")
-        print(f"      系统字段-正确次数：{full_data_row['correct_count']}")
-    else:
-        print("   ❌ 未找到全字段测试数据")
-
-    # ---------------- 测试场景7：验证所有写入结果（读取文件） ----------------
-    print("\n7️⃣ 验证所有写入结果（读取测试文件）")
-    print(f"   测试文件中现有单词：{list(df['word'].dropna())}")
-
-    # ---------------- 清理测试文件 ----------------
-    print("\n🔧 清理测试文件")
-    # 删除测试单词本
-    if os.path.exists(test_book_path):
-        os.remove(test_book_path)
-        print(f"   已删除：{test_book_name}.csv")
-    # 可选：删除default.csv中测试数据（如需保留默认文件可注释）
-    if os.path.exists(default_path):
-        df_default = pd.read_csv(default_path, encoding=DEFAULT_ENCODING)
-        df_default = df_default[df_default['word'] != 'engineer']  # 移除测试数据
-        df_default.to_csv(default_path, index=False, encoding=DEFAULT_ENCODING)
-        print(f"   已清理default.csv中的测试数据")
-
-    print("\n" + "=" * 80)
-    print("✅ 写入单词数据测试完成！")
-    print("=" * 80)
+# 我背你走到最后 能不能不要回头 你紧紧地抱住我 说你不需要承诺
