@@ -1,4 +1,4 @@
-# tests/test_common_csv.py
+# tests/test_csv_manager.py
 
 import sys
 import os
@@ -6,21 +6,21 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # 然后导入你的模块
-from utils.common_csv import (
+from core.csv_manager import (
     get_wordbook_csv_path,
     create_wordbook_csv,
-    validate_wordbook_csv,
+    validate_csv_headers,
     validate_wordbook_csv_content,
     write_processed_csv,
     read_processed_csv
 )
-from word_constants import WORDBOOKS_FOLDER_NAME, DEFAULT_WORDBOOK, DEFAULT_ENCODING, STANDARD_CSV_HEADERS
+from utils.constants import WORDBOOKS_FOLDER_NAME, DEFAULT_WORDBOOK, DEFAULT_ENCODING, STANDARD_CSV_HEADERS
 import pandas as pd
 
 # 覆盖所有功能的完整测试代码
 if __name__ == "__main__":
     print("=" * 80)
-    print("📝 完整功能测试：utils/common_csv.py")
+    print("📝 完整功能测试：core/csv_manager.py")
     print("=" * 80)
 
     # 前置准备：清理可能残留的测试文件
@@ -70,15 +70,15 @@ if __name__ == "__main__":
     # ---------------- 测试3：validate_wordbook_csv 表头校验测试 ----------------
     print("\n3️⃣ 测试：validate_wordbook_csv 表头校验")
     # 3.1 测试文件不存在
-    is_valid, error_msg = validate_wordbook_csv(get_wordbook_csv_path("not_exist"))
+    is_valid, error_msg = validate_csv_headers(get_wordbook_csv_path("not_exist"))
     print(f"   文件不存在：{'❌ 失败' if not is_valid else '✅ 成功'} → 提示：{error_msg}")
     # 3.2 测试正常文件
-    is_valid, error_msg = validate_wordbook_csv(test_book_path)
+    is_valid, error_msg = validate_csv_headers(test_book_path)
     print(f"   正常文件：{'✅ 成功' if is_valid else '❌ 失败'} → 提示：{error_msg}")
     # 3.3 测试表头缺失（手动创建坏文件）
     bad_header_path = get_wordbook_csv_path("bad_header_test")
     pd.DataFrame(columns=["word", "bad_column"]).to_csv(bad_header_path, index=False, encoding=DEFAULT_ENCODING)
-    is_valid, error_msg = validate_wordbook_csv(bad_header_path)
+    is_valid, error_msg = validate_csv_headers(bad_header_path)
     print(f"   表头缺失：{'❌ 失败' if not is_valid else '✅ 成功'} → 提示：{error_msg}")
     os.remove(bad_header_path)
 

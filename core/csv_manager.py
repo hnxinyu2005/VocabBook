@@ -1,74 +1,27 @@
-# utils/common_csv.py
+# utils/csv_manager.py
 
 import pandas as pd
 import os
 import re
 
-from word_constants import WORDBOOKS_FOLDER_NAME, DEFAULT_WORDBOOK, STANDARD_CSV_HEADERS, DEFAULT_ENCODING, DEFAULT_VALUES
-from utils.split_meaning import split_word_meaning
-from utils.split_example import split_word_example
-from utils.calculate_word_accuracy import calculate_accuracy_numeric
+from utils.constants import DEFAULT_WORDBOOK, STANDARD_CSV_HEADERS, DEFAULT_ENCODING, DEFAULT_VALUES
+from utils.text.split_meaning import split_word_meaning
+from utils.text.split_example import split_word_example
+from utils.math.calculate_word_accuracy import calculate_accuracy_numeric
+from utils.system.path import get_wordbook_csv_path
+from utils.system.file import check_file_exist
 
-def get_wordbook_csv_path(filename):
-    '''
-    生成单词本csv文件路径
-
-    :param filename: 文件名 无需后缀
-    :return: 安全的csv绝对路径
-    '''
-
-    # 去除空格和多余后缀
-    filename_stripped = filename.strip() if filename else ""
-    # 空文件名默认使用DEFAULT_WORDBOOK
-    if not filename_stripped:
-        filename_stripped = DEFAULT_WORDBOOK
-    # 去除已有的.csv后缀
-    if filename_stripped.lower().endswith(".csv"):
-        filename_stripped = filename_stripped[:-4]
-
-    # 过滤路径遍历字符 + 非法字符
-    # 禁止包含路径分隔符（/、\）和路径遍历符（../、./）
-    forbidden_chars = r"[\\/:\*\?\"<>|]" # 系统非法文件名字符 + 路径符
-    # 替换所有非法字符为下划线
-    safe_filename = re.sub(forbidden_chars, "_", filename_stripped)
-    # 进一步过滤路径遍历关键词（防止../变形绕过，如..\、. ./等）
-    safe_filename = re.sub(r"\.\.+", "_", safe_filename) # 过滤多个点
-    safe_filename = re.sub(r"\.\s*/", "_", safe_filename) # 过滤. / 形式
-    safe_filename = re.sub(r"\.\s*\\", "_", safe_filename) # 过滤. \ 形式
-
-    # 强制限制路径在单词本目录内
-    # 拼接基础文件名
-    csv_filename = f"{safe_filename}.csv"
-    # 获取单词本目录的绝对路径
-    base_dir = os.path.abspath(
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), WORDBOOKS_FOLDER_NAME)
-    )
-    # 拼接目标文件路径
-    file_path = os.path.join(base_dir, csv_filename)
-    # 强制转换为绝对路径 防止相对路径绕过
-    file_path = os.path.abspath(file_path)
-
-    # 确保文件路径在单词本目录内
-    # 检查目标路径是否是单词本目录的子路径
-    if not file_path.startswith(base_dir + os.sep):
-        # 若跳出 则强制使用默认文件名
-        csv_filename = f"{DEFAULT_WORDBOOK}.csv"
-        file_path = os.path.join(base_dir, csv_filename)
-
-    return file_path
-
-def validate_wordbook_csv(file_path):
-    '''
+def validate_csv_headers(file_path):
+    """
     检查csv是否存在及验证表头
 
     :param file_path: 文件路径
     :return:tuple (is_valid: bool, error_msg: str)
              - is_valid: True=校验通过，False=校验失败
              - error_msg: 空字符串=无错误，否则为具体错误信息
-    '''
-
+    """
     # 文件是否存在
-    if not os.path.exists(file_path):
+    if not check_file_exist(file_path):
         return False, f"{file_path} 文件不存在"
 
     # 表头合规性
@@ -89,14 +42,14 @@ def validate_wordbook_csv(file_path):
         return False, f"读取CSV表头失败，{str(e)}"
 
 def validate_wordbook_csv_content(file_path):
-    '''
+    """
     检查csv的文件内容是否符合规范，主要检查word和meaning字段是否为空
 
     :param file_path: 文件路径
     :return:tuple (is_valid: bool, error_msg: str)
              - is_valid: True=校验通过，False=校验失败
              - error_msg: 空字符串=无错误，否则为具体错误信息
-    '''
+    """
     # 无需重复检查文件存在性（validate_wordbook_csv已校验）
     # 无需重复捕获读取异常（validate_wordbook_csv已处理表头读取）
 
@@ -130,7 +83,7 @@ def validate_wordbook_csv_content(file_path):
 
 
 def create_wordbook_csv(filename, encoding=DEFAULT_ENCODING):
-    '''
+    """
     新建csv并写入标准表头
 
     :param filename: 文件名 无需带后缀
@@ -138,7 +91,7 @@ def create_wordbook_csv(filename, encoding=DEFAULT_ENCODING):
     :return: tuple (is_done: bool, error_msg: str)
              - is_valid: True=写入完成，False=写入失败
              - error_msg: 空字符串=无错误，否则为具体错误信息
-    '''
+    """
 
     # 去除首尾空格后检查是否为空
     filename_stripped = filename.strip()
@@ -164,7 +117,7 @@ def create_wordbook_csv(filename, encoding=DEFAULT_ENCODING):
     file_path = get_wordbook_csv_path(filename_stripped)
 
     # 检查文件是否已存在
-    if os.path.exists(file_path):
+    if check_file_exist(file_path):
         return False, f"文件名 {file_path} 已存在，无法重复创建"
 
     try:
@@ -188,7 +141,7 @@ def create_wordbook_csv(filename, encoding=DEFAULT_ENCODING):
         return False, f"文件 {file_path} 创建失败，{str(e)}"
 
 def write_processed_csv(text, filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODING):
-    '''
+    """
     将**已经处理好的文本**写入csv
     存在性校验和格式校验是必须的，文件名输错会报错，留空则默认default
 
@@ -200,7 +153,7 @@ def write_processed_csv(text, filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODI
     :return: tuple (is_done: bool, error_msg: str)
              - is_done: True=写入完成，False=写入失败
              - error_msg: 空字符串=无错误，否则为具体错误信息
-    '''
+    """
 
     # 缺少filename则为默认单词库 写在了函数定义
     # 去空格后检查
@@ -213,7 +166,7 @@ def write_processed_csv(text, filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODI
     # 检查文件是否存在
     file_exists = os.path.exists(file_path)
     if file_exists:
-        is_valid, error_msg = validate_wordbook_csv(file_path)
+        is_valid, error_msg = validate_csv_headers(file_path)
         if not is_valid:
             return False, f"文件格式校验失败，{error_msg}"
     else:
@@ -324,7 +277,7 @@ def write_processed_csv(text, filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODI
         return False, f"写入过程出现系统错误：{str(e)}"
 
 def read_processed_csv(filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODING, validate=True, split_fields=True):
-    '''
+    """
     读取csv并完成预处理。
 
     :param filename: 文件名
@@ -332,18 +285,15 @@ def read_processed_csv(filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODING, val
     :param validate: 是否校验csv存在性及格式
     :param split_fields: 是否自动拆分
     :return: pandas.DataFrame 处理后的单词数据
-    '''
+    """
 
     # 缺少filename则为默认单词库 写在了函数定义
     # 获取单词库路径
     file_path = get_wordbook_csv_path(filename)
 
-    is_valid = True
-    error_msgs = ""
-
     if validate:
         # 检查文件存在性及表头规范
-        is_valid, error_msg = validate_wordbook_csv(file_path)
+        is_valid, error_msg = validate_csv_headers(file_path)
         if not is_valid:
             print(error_msg)
             return pd.DataFrame()

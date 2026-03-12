@@ -1,8 +1,20 @@
-from flask import Flask
-from routes.word_routes import register_word_routes
+# main.py
+import sys
+import os
 
-# 初始化Flask应用
-app = Flask(__name__)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# 注册单词相关路由（仅这一行，路由完全独立）
-register_word_routes(app)
+from app.tk.main_menu import MainMenu
+
+if __name__ == "__main__":
+    # 方式1：用默认占比（从constants来）
+    app = MainMenu(title="VocabBook")
+
+    # 方式2：自定义占比（比如悬浮小窗用20%宽、30%高）
+    # app = MainWordWindow(
+    #     title="悬浮单词本",
+    #     width_percent=0.2,
+    #     height_percent=0.3
+    # )
+
+    app.run()

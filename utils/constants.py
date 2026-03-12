@@ -1,4 +1,4 @@
-# services/word_constants.py
+# services/constants.py
 
 # 单词文件夹
 WORDBOOKS_FOLDER_NAME = "wordbooks"
@@ -25,3 +25,7 @@ DEFAULT_VALUES = {
 
 # 词性标记最大长度
 POS_MAX_LENGTH = 6
+
+# 窗口默认占屏百分比
+DEFAULT_WINDOW_WIDTH_PERCENT = 0.4  # 默认宽度占屏幕40%
+DEFAULT_WINDOW_HEIGHT_PERCENT = 0.5 # 默认高度占屏幕50%
