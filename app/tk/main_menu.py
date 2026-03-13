@@ -2,26 +2,53 @@
 import tkinter as tk
 from app.tk.components.main_menu.left_panel.main import create_left_panel
 from app.tk.components.main_menu.right_panel import create_right_panel
+from app.tk.base_window import BaseCustomWindow  # 导入基类
+from utils.constants import DEFAULT_WINDOW_WIDTH_PERCENT, DEFAULT_WINDOW_HEIGHT_PERCENT
+from app.tk.components.main_menu.left_panel.utils import calculate_left_width
 
 
-class MainMenu:
+class MainMenu(BaseCustomWindow):
     """主菜单窗口"""
 
     def __init__(self, root: tk.Tk):
-        self.root = root
-        self.root.title("VocabBook")
-        self.root.geometry("1000x600")  # 设置窗口大小
-        self.root.resizable(True, True)  # 允许缩放
+        # 调用基类初始化
+        super().__init__(
+            root=root,
+            title="VocabBook",
+            width_percent=DEFAULT_WINDOW_WIDTH_PERCENT,
+            height_percent=DEFAULT_WINDOW_HEIGHT_PERCENT,
+            resizable=(False, False)
+        )
 
-        # 主容器
-        main_container = tk.Frame(self.root)
-        main_container.pack(fill=tk.BOTH, expand=True)
+        # 创建主容器
+        self.main_container = tk.Frame(self.root)
+        self.main_container.pack(fill=tk.BOTH, expand=True)
 
-        # 创建右侧面板（先创建，获取切换函数）
-        right_panel, self.switch_content = create_right_panel(main_container, width=800)
+        # 先创建右侧面板
+        self.right_panel, self.switch_content = create_right_panel(self.main_container, width=0)
 
-        # 创建左侧面板（传递切换函数作为回调）
-        self.left_panel = create_left_panel(main_container, width=200, click_callback=self.switch_content)
+        # 延迟计算左侧宽度
+        self.root.after(10, self.init_left_panel)  # 延迟10ms，确保窗口已渲染
+
+    def init_left_panel(self):
+        """初始化左侧面板（按百分比计算宽度）"""
+        # 获取窗口当前宽度
+        window_width = self.root.winfo_width()
+        left_width = calculate_left_width(window_width)  # 直接调用工具函数
+        # 创建左侧面板（传入计算后的宽度）
+        self.left_panel = create_left_panel(
+            self.main_container,
+            width=left_width,
+            click_callback=self.switch_content
+        )
+
+    def on_window_resize(self, event):
+        """窗口缩放时更新左侧宽度"""
+        # 避免重复创建：先销毁旧的左侧面板，再重新创建
+        if hasattr(self, 'left_panel') and self.left_panel.winfo_exists():
+            self.left_panel.destroy()
+        # 重新初始化左侧面板
+        self.init_left_panel()
 
 
 if __name__ == "__main__":

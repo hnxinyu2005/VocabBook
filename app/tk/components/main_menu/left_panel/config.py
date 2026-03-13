@@ -13,7 +13,7 @@ BAR_COLORS = {
 
 # 尺寸配置
 BAR_SIZES = {
-    "welcome_height": 60,           # 欢迎条高度
+    "welcome_height": 50,           # 欢迎条高度
     "func_height": 50,              # 功能条高度
     "bar_padx": 0,                  # 蓝条左右内边距
     "bar_pady": 2,                  # 蓝条上下间距
@@ -25,3 +25,5 @@ BAR_FONTS = {
     "welcome": ("微软雅黑", 12, "bold"),  # 欢迎条字体
     "func": ("微软雅黑", 11, "bold")      # 功能条字体
 }
+
+LEFT_PANEL_WIDTH_PERCENT = 0.25  # 左侧宽度占窗口总宽度的x
