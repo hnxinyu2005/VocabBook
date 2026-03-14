@@ -1,4 +1,4 @@
-# utils/csv_manager.py
+# core/csv_manager.py
 
 import pandas as pd
 import os
@@ -139,6 +139,41 @@ def create_wordbook_csv(filename, encoding=DEFAULT_ENCODING):
 
     except Exception as e:
         return False, f"文件 {file_path} 创建失败，{str(e)}"
+
+def delete_wordbook_csv(filename):
+    """
+    删除单词本
+
+    :param filename: 文件名
+    :return: tuple (is_done: bool, error_msg: str)
+             - is_valid: True=删除完成，False=删除失败
+             - error_msg: 空字符串=无错误，否则为具体错误信息
+    """
+
+    # 去除空格并检查空值
+    filename_stripped = filename.strip()
+    if not filename_stripped:
+        return False, "单词本名称不能为空"
+
+    # 禁止删除默认单词本
+    if filename_stripped == DEFAULT_WORDBOOK:
+        return False, f"禁止删除默认单词本（{DEFAULT_WORDBOOK}）"
+
+    # 获取单词本文件路径
+    file_path = get_wordbook_csv_path(filename_stripped)
+
+    # 检查文件是否存在
+    if not check_file_exist(file_path):
+        return False, f"单词本文件不存在：{file_path}"
+
+    # 执行删除操作
+    try:
+        os.remove(file_path)
+        return True, f"单词本「{filename_stripped}」已成功删除（路径：{file_path}）"
+    except PermissionError:
+        return False, f"删除失败，无文件操作权限，或文件正在被其他程序占用（{file_path}）"
+    except Exception as e:
+        return False, f"删除单词本出错：{str(e)}"
 
 def write_processed_csv(text, filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODING):
     """

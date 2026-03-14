@@ -13,7 +13,7 @@ BAR_COLORS = {
 
 # 尺寸配置
 BAR_SIZES = {
-    "welcome_height": 50,           # 欢迎条高度
+    "welcome_height": 100,           # 欢迎条高度
     "func_height": 50,              # 功能条高度
     "bar_padx": 0,                  # 蓝条左右内边距
     "bar_pady": 2,                  # 蓝条上下间距

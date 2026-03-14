@@ -31,13 +31,24 @@ def get_wordbook_csv_path(filename):
     safe_filename = re.sub(r"\.\s*/", "_", safe_filename) # 过滤. / 形式
     safe_filename = re.sub(r"\.\s*\\", "_", safe_filename) # 过滤. \ 形式
 
+    # 通过当前文件向上回溯到项目根目录
+    # path.py 路径：utils/system/path.py → 向上两级到项目根目录
+    current_file_dir = os.path.dirname(os.path.abspath(__file__))  # utils/system
+    utils_dir = os.path.dirname(current_file_dir)  # utils
+    project_root = os.path.dirname(utils_dir)  # 项目根目录
+
+    # 方案2：通过运行目录获取项目根目录（备选，若方案1路径层级变化可改用）
+    # project_root = os.path.abspath(os.getcwd())
+
+    # 拼接单词本目录（项目根目录/wordbooks）
+    base_dir = os.path.join(project_root, WORDBOOKS_FOLDER_NAME)
+    # 确保base_dir是绝对路径
+    base_dir = os.path.abspath(base_dir)
+
     # 强制限制路径在单词本目录内
     # 拼接基础文件名
     csv_filename = f"{safe_filename}.csv"
-    # 获取单词本目录的绝对路径
-    base_dir = os.path.abspath(
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), WORDBOOKS_FOLDER_NAME)
-    )
+
     # 拼接目标文件路径
     file_path = os.path.join(base_dir, csv_filename)
     # 强制转换为绝对路径 防止相对路径绕过

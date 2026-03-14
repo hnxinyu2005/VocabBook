@@ -3,6 +3,7 @@
 import os
 import csv
 from utils.constants import WORDBOOKS_FOLDER_NAME
+from utils.system.path import get_wordbook_csv_path
 
 def check_file_exist(file_path):
     """
@@ -12,10 +13,7 @@ def check_file_exist(file_path):
     :return: bool is_exist
     """
 
-    if os.path.exists(file_path):
-        return True
-    else:
-        return False
+    return os.path.exists(file_path)
 
 def get_all_wordbooks():
     """
@@ -24,7 +22,8 @@ def get_all_wordbooks():
     :return: [{"name": "单词本名称", "path": "文件路径", "word_count": 单词数量}, ...]
     """
     # 目录存在
-    wordbook_dir = os.path.join(os.getcwd(), WORDBOOKS_FOLDER_NAME)
+    default_book_path = get_wordbook_csv_path("default")
+    wordbook_dir = os.path.dirname(default_book_path)
     if not os.path.exists(wordbook_dir):
         os.makedirs(wordbook_dir)
         return []  # 空目录返回空列表
