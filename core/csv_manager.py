@@ -397,4 +397,42 @@ def read_processed_csv(filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODING, val
         print(f"读取并预处理CSV失败，{str(e)}")
         return pd.DataFrame()
 
+
+def get_wordbook_word_count(filename=DEFAULT_WORDBOOK, encoding=DEFAULT_ENCODING):
+    """
+    统计指定单词本的有效单词数量
+
+    :param filename: 单词本名称
+    :param encoding: 编码格式
+    :return: int - 有效单词数量（异常时返回0）
+    """
+    # 获取文件路径
+    file_path = get_wordbook_csv_path(filename.strip())
+
+    # 文件不存在直接返回0
+    if not check_file_exist(file_path):
+        return 0
+
+    # 读取并统计有效单词数量
+    try:
+        # 读取CSV（仅读取word列，提升性能）
+        df = pd.read_csv(
+            file_path,
+            encoding=encoding,
+            usecols=['word'],  # 只加载需要的列，减少内存占用
+            dtype={'word': str}
+        )
+
+        # 过滤无效数据（空值、纯空格）
+        df['word'] = df['word'].astype(str).str.strip()
+        valid_words = df[df['word'] != '']  # 排除空单词
+
+        # 返回有效单词数量
+        return len(valid_words)
+
+    except Exception as e:
+        # 异常时返回0（避免UI层崩溃）
+        print(f"统计单词本「{filename}」数量失败，{str(e)}")
+        return 0
+
 # 我背你走到最后 能不能不要回头 你紧紧地抱住我 说你不需要承诺

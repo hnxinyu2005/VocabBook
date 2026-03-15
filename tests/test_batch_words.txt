@@ -1,0 +1,22 @@
+[
+    {"word": "apple", "phonetic": "/ˈæpl/", "meaning": "n. 苹果；苹果树", "review_count": "5", "correct_count": "4", "last_review": "2026-03-14"},
+    {"word": "banana", "phonetic": "/bəˈnɑːnə/", "meaning": "n. 香蕉；芭蕉属植物", "review_count": "3", "correct_count": "3", "last_review": "2026-03-13"},
+    {"word": "orange", "phonetic": "/ˈɒrɪndʒ/", "meaning": "n. 橙子；橙色 adj. 橙色的", "review_count": "2", "correct_count": "2", "last_review": "2026-03-12"},
+    {"word": "grape", "phonetic": "/ɡreɪp/", "meaning": "n. 葡萄；葡萄藤", "review_count": "4", "correct_count": "3", "last_review": "2026-03-11"},
+    {"word": "pear", "phonetic": "/peə(r)/", "meaning": "n. 梨；梨树", "review_count": "1", "correct_count": "1", "last_review": "2026-03-10"},
+    {"word": "watermelon", "phonetic": "/ˈwɔːtəmelən/", "meaning": "n. 西瓜", "review_count": "6", "correct_count": "5", "last_review": "2026-03-09"},
+    {"word": "strawberry", "phonetic": "/ˈstrɔːbəri/", "meaning": "n. 草莓；草莓色", "review_count": "7", "correct_count": "6", "last_review": "2026-03-08"},
+    {"word": "mango", "phonetic": "/ˈmæŋɡəʊ/", "meaning": "n. 芒果；芒果树", "review_count": "2", "correct_count": "1", "last_review": "2026-03-07"},
+    {"word": "pineapple", "phonetic": "/ˈpaɪnæpl/", "meaning": "n. 菠萝；凤梨", "review_count": "3", "correct_count": "3", "last_review": "2026-03-06"},
+    {"word": "peach", "phonetic": "/piːtʃ/", "meaning": "n. 桃子；桃色；桃树", "review_count": "4", "correct_count": "2", "last_review": "2026-03-05"},
+    {"word": "apple", "phonetic": "/ˈæpl/", "meaning": "n. 苹果（重复测试）", "review_count": "1", "correct_count": "1", "last_review": "2026-03-04"},  # 重复单词（会被函数拦截）
+    {"word": "", "phonetic": "/ˈlemən/", "meaning": "n. 柠檬", "review_count": "2", "correct_count": "2", "last_review": "2026-03-03"},  # 空word（会被函数拦截）
+    {"word": "lemon", "phonetic": "/ˈlemən/", "meaning": "", "review_count": "5", "correct_count": "4", "last_review": "2026-03-02"},  # 空meaning（会被函数拦截）
+    {"word": "cherry", "phonetic": "/ˈtʃeri/", "meaning": "n. 樱桃；樱桃树；樱桃色", "review_count": "8", "correct_count": "7", "last_review": "2026-03-01"},
+    {"word": "apricot", "phonetic": "/ˈeɪprɪkɒt/", "meaning": "n. 杏；杏树；杏黄色", "review_count": "2", "correct_count": "2", "last_review": ""},  # 空last_review
+    {"word": "plum", "phonetic": "/plʌm/", "meaning": "n. 李子；梅子；洋李", "review_count": "abc", "correct_count": "3", "last_review": "2026-02-28"},  # review_count非数字（函数自动转0）
+    {"word": "lychee", "phonetic": "/ˌlaɪˈtʃiː/", "meaning": "n. 荔枝；荔枝树", "review_count": "4", "correct_count": "xyz", "last_review": "2026-02-27"},  # correct_count非数字（函数自动转0）
+    {"word": "kiwi", "phonetic": "/ˈkiːwi/", "meaning": "n. 猕猴桃；几维鸟；新西兰人", "review_count": "1", "correct_count": "1", "last_review": "2026-02-26"},
+    {"word": "pomegranate", "phonetic": "/ˈpɒmɪɡrænɪt/", "meaning": "n. 石榴；石榴树", "review_count": "9", "correct_count": "8", "last_review": "2026-02-25"},
+    {"word": "blueberry", "phonetic": "/ˈbluːbəri/", "meaning": "n. 蓝莓；越橘属的浆果", "review_count": "3", "correct_count": "3", "last_review": "2026-02-24"}
+]

@@ -62,3 +62,16 @@ def get_wordbook_csv_path(filename):
         file_path = os.path.join(base_dir, csv_filename)
 
     return file_path
+
+def format_file_path_for_display(file_path):
+    """通用工具：将项目根目录前的路径替换为...（用于UI展示）"""
+    if not file_path or file_path == "无":
+        return "无"
+
+    # 匹配VocabBook文件夹（可移到constants常量）
+    vocab_book_key = "VocabBook"
+    if vocab_book_key in file_path:
+        idx = file_path.index(vocab_book_key)
+        formatted_path = f"...{os.sep}{file_path[idx:]}"
+        return formatted_path
+    return file_path

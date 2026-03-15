@@ -2,7 +2,7 @@
 
 import os
 import csv
-from utils.constants import WORDBOOKS_FOLDER_NAME
+from utils.constants import DEFAULT_ENCODING
 from utils.system.path import get_wordbook_csv_path
 
 def check_file_exist(file_path):
@@ -21,6 +21,9 @@ def get_all_wordbooks():
 
     :return: [{"name": "单词本名称", "path": "文件路径", "word_count": 单词数量}, ...]
     """
+
+    from core.csv_manager import get_wordbook_word_count
+
     # 目录存在
     default_book_path = get_wordbook_csv_path("default")
     wordbook_dir = os.path.dirname(default_book_path)
@@ -37,7 +40,7 @@ def get_all_wordbooks():
         file_path = os.path.join(wordbook_dir, filename) # 拼接完整路径
         book_name = os.path.splitext(filename)[0] # 提取单词本名称（去掉.csv后缀）
 
-        # 校验文件合法性并统计单词数量
+        # 校验文件合法性
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
@@ -45,11 +48,16 @@ def get_all_wordbooks():
                 required_fields = {"word", "meaning"}
                 if not required_fields.issubset(reader.fieldnames):
                     continue  # 字段不全，跳过该文件
-                # 统计单词数量
-                word_count = sum(1 for _ in reader)
+
         except Exception as e:
             print(f"读取单词本 {filename} 失败，{e}")
             continue
+
+        # 传入：单词本名称 + 编码格式（从constants导入）
+        word_count = get_wordbook_word_count(
+            filename=book_name,  # 传入单词本名称（无.csv后缀）
+            encoding=DEFAULT_ENCODING  # 使用统一编码常量
+        )
 
         wordbooks.append({
             "name": book_name,
