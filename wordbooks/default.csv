@@ -1,18 +1,1 @@
-word,phonetic,meaning,example,example_trans,textbook,unit,review_count,correct_count,last_review
-apple,,"苹果,苹果",,,,,,,
-banana,/bəˈnɑːnə/,n. 香蕉；芭蕉属植物,,,,,3,3,2026-03-13
-orange,/ˈɒrɪndʒ/,n. 橙子；橙色 adj. 橙色的,,,,,2,2,2026-03-12
-grape,/ɡreɪp/,n. 葡萄；葡萄藤,,,,,4,3,2026-03-11
-pear,/peə(r)/,n. 梨；梨树,,,,,1,1,2026-03-10
-watermelon,/ˈwɔːtəmelən/,n. 西瓜,,,,,6,5,2026-03-09
-strawberry,/ˈstrɔːbəri/,n. 草莓；草莓色,,,,,7,6,2026-03-08
-mango,/ˈmæŋɡəʊ/,n. 芒果；芒果树,,,,,2,1,2026-03-07
-pineapple,/ˈpaɪnæpl/,n. 菠萝；凤梨,,,,,3,3,2026-03-06
-peach,/piːtʃ/,n. 桃子；桃色；桃树,,,,,4,2,2026-03-05
-cherry,/ˈtʃeri/,n. 樱桃；樱桃树；樱桃色,,,,,8,7,2026-03-01
-apricot,/ˈeɪprɪkɒt/,n. 杏；杏树；杏黄色,,,,,2,2,
-plum,/plʌm/,n. 李子；梅子；洋李,,,,,0,3,2026-02-28
-lychee,/ˌlaɪˈtʃiː/,n. 荔枝；荔枝树,,,,,4,0,2026-02-27
-kiwi,/ˈkiːwi/,n. 猕猴桃；几维鸟；新西兰人,,,,,1,1,2026-02-26
-pomegranate,/ˈpɒmɪɡrænɪt/,n. 石榴；石榴树,,,,,9,8,2026-02-25
-blueberry,/ˈbluːbəri/,n. 蓝莓；越橘属的浆果,,,,,3,3,2026-02-24
+word,phonetic,meaning,example,example_trans,textbook,unit,review_count,correct_count,last_review,stability,difficulty,next_review	,retrievability,wrong_count,first_learn

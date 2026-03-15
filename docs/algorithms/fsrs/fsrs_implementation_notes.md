@@ -55,6 +55,7 @@
 > ---
 >
 > 首次评分后的初始稳定性：
+> 
 > $$S_0(G) = w_{G-1}.$$
 >
 > 例如：$S_0(1) = w_0$ 是第一次评分为 Again（再次）时的初始稳定性。第一次评分为 Easy（容易）时，初始稳定性为 $S_0(4) = w_3$。
@@ -62,6 +63,7 @@
 > ---
 >
 > 首次评分后的初始难度：
+> 
 > $$D_0(G) = w_4 - (G - 3) \cdot w_5.$$
 >
 > 其中，第一次评分为 Good（良好）时，$D_0(3) = w_4$。
@@ -69,6 +71,7 @@
 > ---
 >
 > 复习后的新难度：
+> 
 > $$D'(D, G) = w_7 \cdot D_0(3) + (1 - w_7) \cdot \bigl(D - w_6 \cdot (G - 3)\bigr).$$
 >
 > 它会先用 $D' = D - w_6 \cdot (G - 3)$ 计算临时难度，再通过均值回归 $w_7 \cdot D_0(3) + (1 - w_7) \cdot D'$ 进行修正，以避免出现“难度地狱（ease hell）”。
@@ -76,16 +79,21 @@
 > ---
 >
 > 自上次复习 t 天后的可检索性:
+> 
 > $$R(t, S) = \left(1 + \frac{t}{9 \cdot S}\right)^{-1},$$
+> 
 > 其中，当 $t = S$ 时，$R(t, S) = 0.9$。
 >
 > 将目标回忆率代入上面公式中的 $R$ 并求解 $t$，即可得到下一次复习间隔：
+> 
 > $$I(r, S) = 9 \cdot S \cdot \left(\frac{1}{r} - 1\right),$$
+> 
 > 其中：当 $r = 0.9$ 时，$I(r, S) = S$。
 >
 > ---
 >
 > 复习成功后的新稳定性（用户按下 Hard、Good 或 Easy 视为复习成功）：
+> 
 > $$S'_r(D, S, R, G) = S \cdot \left(e^{w_8} \cdot (11 - D) \cdot S^{-w_9} \cdot \left(e^{w_{10} \cdot (1 - R)} - 1\right) \cdot w_{15}\,(\text{if } G = 2) \cdot w_{16}\,(\text{if } G = 4) + 1\right).$$
 > 
 > 我们用 SInc（稳定性增幅）表示：$SInc = \frac{S_r'(D, S, R, G)}{S}$，它等价于 Anki 里的复习系数。
@@ -104,6 +112,27 @@
 >  ---
 > 
 > 遗忘后的新稳定性（复习失败）：
+> 
 > $$S'_f(D, S, R) = w_{11} \cdot D^{-w_{12}} \cdot \left( (S+1)^{w_{13}} - 1 \right) \cdot e^{w_{14} \cdot (1-R)}.$$
 > 
 > 比如，在默认参数下，当 $D=2$，$R=0.9$ 时，则 $S'_f(S = 100) = 2 \cdot 2^{-0.2} \cdot \left( (100 + 1)^{0.2} - 1 \right) \cdot e^{1 \cdot (1 - 0.9)} \approx 3$ 并且 $S_f'(S=1) ≈ 0.3$。
+
+##### 参数设定
+
+项目构建初期给一个单词留出的数据结构有以下参数：
+```text
+"word", "phonetic", "meaning", "example", "example_trans",
+"textbook", "unit", "review_count", "correct_count", "last_review"
+```
+
+为了应用 FSRS v4 算法，以下核心参数是必须的：
+```text
+"stability", "difficulty", "next_review	", "retrievability"
+```
+
+还可以有以下辅助参数：
+```text
+"wrong_count", "first_learn"
+```
+
+将新增的参数写入 utils/constants.py 下的 STANDARD_CSV_HEADERS。
