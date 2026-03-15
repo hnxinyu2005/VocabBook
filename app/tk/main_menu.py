@@ -10,13 +10,17 @@ from app.tk.components.main_menu.left_panel.utils import calculate_left_width
 class MainMenu(BaseCustomWindow):
     """主菜单窗口"""
 
-    def __init__(self, root: tk.Tk):
+    def __init__(self, title: str = "VocabBook",
+                 width_percent: float = DEFAULT_WINDOW_WIDTH_PERCENT,
+                 height_percent: float = DEFAULT_WINDOW_HEIGHT_PERCENT):
+        # 创建根窗口
+        root = tk.Tk()
         # 调用基类初始化
         super().__init__(
             root=root,
-            title="VocabBook",
-            width_percent=DEFAULT_WINDOW_WIDTH_PERCENT,
-            height_percent=DEFAULT_WINDOW_HEIGHT_PERCENT,
+            title=title,
+            width_percent=width_percent,
+            height_percent=height_percent,
             resizable=(False, False)
         )
 
@@ -49,6 +53,10 @@ class MainMenu(BaseCustomWindow):
             self.left_panel.destroy()
         # 重新初始化左侧面板
         self.init_left_panel()
+
+    def run(self):
+        """启动主菜单窗口"""
+        self.root.mainloop()
 
 
 if __name__ == "__main__":
