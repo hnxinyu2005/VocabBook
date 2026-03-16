@@ -1,6 +1,6 @@
 # VocabBook 中的 FSRS 记忆算法复刻日记
 > 本项目为个人学习开发的**非商用项目**，仅用于记忆算法的学习与实践，不涉及任何商业用途。  
-> 其中 FSRS 算法的部分源自（部分改编自） [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki)，遵循其开源协议。
+> 其中 FSRS 算法的源自（部分改编自） [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki)，遵循其开源协议。
 
 最后更新：2026-3-15
 
@@ -136,3 +136,5 @@
 ```
 
 将新增的参数写入 utils/constants.py 下的 STANDARD_CSV_HEADERS。
+
+TODO 我觉得下一步应该是呢 在用户导入词库后 给等级赋个中间值吧 导入后马上让用户选择的话也可以
