@@ -1,5 +1,6 @@
 # core/memory_algorithms/fsrs_v4/algorithm.py
 
+import math
 from core.memory_algorithms.fsrs_v4.constants import FSRSReviewRating, FSRS_DEFAULT_RATING, FSRS_V4_DEFAULT_PARAMS
 
 def calculate_initial_stability(rating: FSRSReviewRating = FSRS_DEFAULT_RATING) -> float:
@@ -70,3 +71,47 @@ def calculate_review_interval(stability: float, target_recall: float = 0.9) -> f
     interval = max(0.1, interval) # 间隔最小为0.1天
 
     return round(interval, 2)
+
+def calculate_updated_stability_success(
+    current_difficulty: float,
+    current_stability: float,
+    retrievability: float,
+    rating: FSRSReviewRating,
+    w=FSRS_V4_DEFAULT_PARAMS
+) -> float:
+    """
+    计算复习成功后的新稳定性
+
+    :param current_difficulty: 单词当前难度
+    :param current_stability: 单词当前稳定性
+    :param retrievability: 复习时的可见索性
+    :param rating: 复习评分
+    :param w: 官方参数
+    :return: 复习后的新稳定性（大于等于原稳定性，2位小数）
+    """
+    # 防错处理
+    current_stability = max(0.01, current_stability)  # 稳定性不能为0
+    current_difficulty = max(1.0, min(10.0, current_difficulty))  # 难度约束1~10
+    retrievability = max(0.0, min(1.0, retrievability))  # 可检索性约束0~1
+
+    w8 = w[8]
+    w9 = w[9]
+    w10 = w[10]
+    w15 = w[15]
+    w16 = w[16]
+
+    exp_w8 = math.exp(w8) # 计算基础指数项 e^w8
+    difficulty_term = 11 - current_difficulty # 乘以难度修正项 (11 - D)
+    stability_decay_term = current_stability ** (-w9) # 乘以稳定性衰减项 S^(-w9)
+    retrievability_term = math.exp(w10 * (1 - retrievability)) - 1 # 计算可检索性影响项 e^(w10*(1-R)) - 1
+    core_factor = exp_w8 * difficulty_term * stability_decay_term * retrievability_term # 合并核心增幅因子（前4步相乘）
+    # 按评分添加系数
+    if rating == FSRSReviewRating.HARD:  # G=2
+        core_factor *= w15
+    elif rating == FSRSReviewRating.EASY:  # G=4
+        core_factor *= w16
+    # G=3（GOOD）不处理
+    new_stability = current_stability * (core_factor + 1) # 加1后乘以原稳定性，得到新稳定性
+    new_stability = max(current_stability, new_stability) # 复习成功后稳定性≥原稳定性（SInc≥1）
+
+    return round(new_stability, 2)
